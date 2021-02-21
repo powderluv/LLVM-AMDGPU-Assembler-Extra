@@ -45,11 +45,22 @@ set(AMDPHDRS $<TARGET_FILE:amdphdrs>)
 set(AMDPHDRS_DIR $<TARGET_FILE_DIR:amdphdrs>)
 set(SP3_TO_MC "${CMAKE_SOURCE_DIR}/bin/sp3_to_mc.pl")
 
+macro(device_compile f)
+add_custom_command(
+  OUTPUT ${f}.co
+  COMMAND
+    ${CLANG}  -target amdgcn-amd-amdhsa -mcpu=gfx1030 -c -o ${f}.co ${CMAKE_CURRENT_SOURCE_DIR}/${f}.cpp
+  DEPENDS ${f}.cpp
+  COMMENT "Device compiling ${f}.cpp to ${f}.co"
+)
+endmacro(device_compile)
+
+
 macro(asm_assemble f)
 add_custom_command(
   OUTPUT ${f}.o
   COMMAND
-    ${CLANG}  -x assembler -target amdgcn--amdhsa -mcpu=fiji -c -o ${f}.o ${CMAKE_CURRENT_SOURCE_DIR}/${f}.s
+    ${CLANG}  -x assembler -target amdgcn-amd-amdhsa -mcpu=gfx1030 -mcode-object-version=3 -c -o ${f}.o ${CMAKE_CURRENT_SOURCE_DIR}/${f}.s
   DEPENDS ${f}.s
   COMMENT "Assembling ${f}.s to ${f}.o"
 )
@@ -59,7 +70,7 @@ macro(asm_link f)
 add_custom_command(
   OUTPUT ${f}.co
   COMMAND
-    ${CLANG} -target amdgcn--amdhsa ${f}.o -o ${f}.co
+    ${CLANG} -target amdgcn-amd-amdhsa -mcpu=gfx1030 -mcode-object-version=3 ${f}.o -o ${f}.co
   DEPENDS ${f}.o
   COMMENT "Linking ${f}.o to ${f}.co with clang"
 )
@@ -76,7 +87,7 @@ macro(inline_asm_example f)
   add_custom_command(
     OUTPUT ${f}.co
     COMMAND
-      ${CLANG} -x cl -Xclang -finclude-default-header -Dcl_clang_storage_class_specifiers -target amdgcn--amdhsa -mcpu=fiji -B ${AMDPHDRS_DIR} -o ${f}.co ${CMAKE_CURRENT_SOURCE_DIR}/${f}.cl
+      ${CLANG} -x cl -Xclang -finclude-default-header -Dcl_clang_storage_class_specifiers -target amdgcn-amd-amdhsa -mcpu=gfx1030 -B ${AMDPHDRS_DIR} -o ${f}.co ${CMAKE_CURRENT_SOURCE_DIR}/${f}.cl
     DEPENDS ${f}.cl
     COMMENT "Compiling ${f}.cl to ${f}.co"
   )
@@ -118,7 +129,7 @@ macro(inline_asm_dispatch_example f)
 endmacro(inline_asm_dispatch_example)
 
 add_subdirectory(common)
-add_subdirectory(sp3)
+#add_subdirectory(sp3)
 add_subdirectory(asm-kernel)
-add_subdirectory(gfx8)
-add_subdirectory(api)
+#add_subdirectory(gfx8)
+#add_subdirectory(api)

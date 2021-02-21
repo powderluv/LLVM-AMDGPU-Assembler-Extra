@@ -79,7 +79,7 @@ private:
 
   const char* ArchName = "amdgcn";
   const char* TripleName = "";
-  const char* MCPU = "fiji";
+  const char* MCPU = "gfx1030";
 
   std::string Error;
 
