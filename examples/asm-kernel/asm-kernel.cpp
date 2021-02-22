@@ -60,6 +60,7 @@ public:
     if (!AllocateKernarg(1024)) { return false; }
     out = AllocateBuffer(1024);
     Kernarg(out);
+    SetDynamicGroupSegmentSize(1024);
     SetGridSize(1);
     SetWorkgroupSize(1);
     return true;
